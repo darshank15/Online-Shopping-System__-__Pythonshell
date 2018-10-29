@@ -164,12 +164,15 @@ def diff(tokens) :
                     list1 = myfile1.readlines()
                 with open(file2,'r') as myfile2:
                     list2 = myfile2.readlines()
-                diff1=list(set(list1) - set(list2))
-                diff2=list(set(list2) - set(list1))
+
                 print "===>first file diff<==="
-                printall(diff1)
+                for itm in list1 :
+                    if not itm in list2:
+                        print itm,
                 print "===>second file diff<==="
-                printall(diff2)
+                for itm in list2:
+                    if not itm in list1 :
+                        print itm,
                 
             else :
                 print "one of file doesn't have read permission"
@@ -221,6 +224,7 @@ def grep(inputstr):
     except:
         print "Invalid syntax for grep command"
         return
+    
     offset=0
     patlen=len(pat)
     foundind=strsearch.find(pat,offset)
@@ -238,13 +242,29 @@ def grep(inputstr):
             sys.stdout.write(strsearch[offset+patlen:foundind])
 
         offset=foundind
+
+def sed(inputstr):
     
+    try:
+        tokens = unserinput.split("<<<")
+        str1=tokens[0].strip()
+        str2=tokens[1].strip()
 
+        firpart = str1.split('"')
+        secondpart = str2.split('"')
 
+        pat1 = firpart[1]
+        pat2 = firpart[3]
+        strsearch= secondpart[1]
 
+    except:
+        print "Invalid syntax for sed command"
+        return
 
+    liststr=strsearch.split(pat1)
+    finalans = pat2.join(liststr)
+    print finalans
 
-    
 
 while 1:
     #print "takeinput called"
@@ -284,8 +304,11 @@ while 1:
     elif cmd == "grep":
         #print("grep command")
         grep(unserinput)
+    elif cmd == "sed":
+        #print("sed command")
+        sed(unserinput)
     elif cmd == "exit":
         #print("exit command")
         break
     else:
-        print("give valid command")
+        print("invalid command")
