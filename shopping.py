@@ -426,7 +426,6 @@ class Guest :
         address = raw_input("Enter Address : ")
         phoneNum = raw_input("Enter PhoneNum : ")
         c= Customer(name,address,phoneNum)
-        c= Customer(name,address,phoneNum)
         print "Succefully Registered with ID : ",c.getId()
         outFile = open("customerdb","wb")
         custdict[c.getId()]=c
@@ -488,7 +487,7 @@ class Payment :
 
 a1 = Admin("darshanAdmin")
 g1 = Guest()
-c1 = Customer("cust1","address","phoneNum")
+# c1 = Customer("cust1","address","phoneNum")
 while 1:
     print "1.Admin"
     print "2.Customer"
@@ -528,37 +527,52 @@ while 1:
             
     elif unserinput==2 :
         #Customer mode
-        while 1:
-            print "\n*** Customer Mode ***"
-            print "1.View Product "
-            print "2.Buy Product "
-            print "3.Make Payment"
-            print "4.Add to Cart "
-            print "5.Delete from cart "
-            print "6.View Cart"
-            print "7.Quit from Admin"
-            a1 = Admin("dar1")
+        if not os.path.isfile("customerdb") :
+            print "No customer Record Exist, Please Register first"
+        else :
             try :
-                custinput = int(raw_input("\nEnter Your Choice : "))
+                custid = int(raw_input("Enter Customer ID : "))
             except :
-                print "Invalid Customer choice"
+                print "Please enter valid(integer) Customer ID "
                 continue
-            if custinput==1 :
-                c1.viewProducts()
-            elif custinput==2 :
-                c1.buyProducts()
-            elif custinput==3 :
-                c1.makePayment()
-            elif custinput==4 :
-                c1.addToCart()
-            elif custinput==5 :
-                c1.deleteFromCart()
-            elif custinput==6 :
-                c1.viewCart()
-            elif custinput==7 :
-                break
+
+            inFile=open("customerdb","rb")
+            custdict=pickle.load(inFile)
+            inFile.close()
+            if custid not in custdict :
+                print "Customer ID not exist"
             else :
-                print "Invalid Customer choice"
+                c1 = custdict[custid]
+                while 1:
+                    print "\n*** Customer Mode ***"
+                    print "1.View Product "
+                    print "2.Buy Product "
+                    print "3.Make Payment"
+                    print "4.Add to Cart "
+                    print "5.Delete from cart "
+                    print "6.View Cart"
+                    print "7.Quit from Customer"
+                    try :
+                        custinput = int(raw_input("\nEnter Your Choice : "))
+                    except :
+                        print "Invalid Customer choice"
+                        continue
+                    if custinput==1 :
+                        c1.viewProducts()
+                    elif custinput==2 :
+                        c1.buyProducts()
+                    elif custinput==3 :
+                        c1.makePayment()
+                    elif custinput==4 :
+                        c1.addToCart()
+                    elif custinput==5 :
+                        c1.deleteFromCart()
+                    elif custinput==6 :
+                        c1.viewCart()
+                    elif custinput==7 :
+                        break
+                    else :
+                        print "Invalid Customer choice"
     elif unserinput==3 :
         #Guest mode
         g1.getRegistered()
