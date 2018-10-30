@@ -2,14 +2,21 @@ import pickle
 import os
 
 class Product :
-    __idcount=1
-    def __init__(self,name,group,subgroup,price) :
-        self.__id=Product.__idcount
+   
+    def __init__(self,name,group,subgroup,price) :  
+
+        if not os.path.isfile("productdb"):
+            self.__id=1
+        else :
+            inFile=open("productdb","rb")
+            dictobj=pickle.load(inFile)
+            inFile.close()
+            self.__id=max(dictobj, key=int)+1
+
         self._name = name
         self._group=group
         self._subgroup=subgroup
         self._price=price
-        Product.__idcount = Product.__idcount + 1
 
     def getId(self) :
         return self.__id
@@ -149,13 +156,21 @@ class Admin :
         pass
 
 class Customer :
-    __idcount=1
+   
     def __init__(self,name,address,phoneNo) :
-        self.__id=Customer.__idcount
+
+        if not os.path.isfile("customerdb"):
+            self.__id=1
+        else :
+            inFile=open("customerdb","rb")
+            custdict=pickle.load(inFile)
+            inFile.close()
+            self.__id=max(custdict, key=int)+1
+
         self._name = name
         self._address = address
         self._phoneNo = phoneNo
-        Customer.__idcount = Customer.__idcount + 1
+        
 
     def getId(self) :
         return self.__id
@@ -263,7 +278,7 @@ class Customer :
     def addToCart(self):
 
         try :
-            productaddid = int(raw_input("Enter Product ID you want to add to cart"))
+            productaddid = int(raw_input("Enter Product ID you want to add into the cart : "))
         except:
             print "Invalid Product ID"
             return
@@ -332,28 +347,26 @@ class Customer :
                 print "your cart is empty !!!"
     
     def deleteFromCart(self):
-        try :
-            productaddid = int(raw_input("Enter Product ID you want to remove from cart"))
-        except:
-            print "Invalid Product ID"
-            return
         
         if not os.path.isfile("productdb"):
             print "No Product Found !!! "
             return
         else :
+            if not os.path.isfile("cartdb"):
+                    print "Your cart is empty  !!!"
+                    return 
+            try :
+                productaddid = int(raw_input("Enter Product ID you want to remove from cart : "))
+            except:
+                print "Invalid Product ID"
+                return
+
             inFile=open("productdb","rb")
             proddict=pickle.load(inFile)
             inFile.close()
             if productaddid not in proddict :
                 print "Given PID not exist"
-            
             else :
-
-                if not os.path.isfile("cartdb"):
-                    print "Your cart is empty  !!!"
-                    return 
-                
                 inFile=open("cartdb","rb")
                 cartdict=pickle.load(inFile)
                 inFile.close()
@@ -367,14 +380,26 @@ class Customer :
                         if productaddid == item.getId() :
                             oldlist.remove(item)
                             flag=flag+1
+                    
                     if flag :
-                        cartobj.setProductList(oldlist)
-                        cartobj.setTotal(cartobj.getTotal()-(flag*prodobj.getPrice()))
-                        cartobj.setNumOfProducts(cartobj.getNumOfProducts()-flag)
-                        cartdict[self.__id]=cartobj
+
+                        if len(oldlist) == 0 : #After deletion of record, if list empty then cartdict
+                            del cartdict[self.__id]
+                            if len(cartdict) == 0 :
+                                try :
+                                    os.remove("cartdb")
+                                    return
+                                except:
+                                    return
+                        else :
+                            cartobj.setProductList(oldlist)
+                            cartobj.setTotal(cartobj.getTotal()-(flag*prodobj.getPrice()))
+                            cartobj.setNumOfProducts(cartobj.getNumOfProducts()-flag)
+                            cartdict[self.__id]=cartobj
 
                         outFile = open("cartdb","wb")
                         pickle.dump(cartdict,outFile)
+                        print "cartsize :",len(cartdict)
                         outFile.close()
             
                     else:
@@ -487,7 +512,6 @@ class Payment :
 
 a1 = Admin("darshanAdmin")
 g1 = Guest()
-# c1 = Customer("cust1","address","phoneNum")
 while 1:
     print "1.Admin"
     print "2.Customer"
@@ -575,7 +599,25 @@ while 1:
                         print "Invalid Customer choice"
     elif unserinput==3 :
         #Guest mode
-        g1.getRegistered()
+        while 1 :
+            print "\n*** Guest Mode ***"
+            print "1.View Product"
+            print "2.Get Register"
+            print "3.Quit from Guest"
+            try :
+                guestinput = int(raw_input("\nEnter Your Choice : "))
+            except :
+                print "Invalid Guest choice"
+                continue
+            if guestinput==1 :
+                g1.viewProducts()
+            elif guestinput==2 :
+                g1.getRegistered()
+            elif guestinput==3 :
+                break
+            else :
+                print "Invalid Guest choice"
+
     elif unserinput==4 :
         #quit
         break
