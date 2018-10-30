@@ -5,7 +5,8 @@ def prRed(skk): sys.stdout.write("\033[91m{}\033[00m" .format(skk))
 
 def printallfile(files):
     for file in files:
-        print file
+        if file[0] != '.' :
+            print file
 
 def printall(items):
     for item in items:
